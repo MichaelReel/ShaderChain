@@ -1,0 +1,99 @@
+[gd_scene load_steps=14 format=2]
+
+[ext_resource path="res://icon.png" type="Texture" id=1]
+[ext_resource path="res://compact_scenes/multishader_02/01_worleypoints.gdshader" type="Shader" id=2]
+[ext_resource path="res://compact_scenes/multishader_02/Multishader_02.gd" type="Script" id=3]
+[ext_resource path="res://compact_scenes/multishader_02/02_cleanup.gdshader" type="Shader" id=4]
+[ext_resource path="res://compact_scenes/multishader_02/03_experiment.gdshader" type="Shader" id=5]
+[ext_resource path="res://compact_scenes/multishader_02/setup_shader_loop.gd" type="Script" id=6]
+
+[sub_resource type="ShaderMaterial" id=1]
+shader = ExtResource( 2 )
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = ExtResource( 4 )
+
+[sub_resource type="ViewportTexture" id=3]
+viewport_path = NodePath("PointsViewport")
+
+[sub_resource type="ShaderMaterial" id=6]
+shader = ExtResource( 5 )
+
+[sub_resource type="ViewportTexture" id=5]
+viewport_path = NodePath("CleanupViewport")
+
+[sub_resource type="ViewportTexture" id=7]
+viewport_path = NodePath("Loop/Viewport")
+
+[sub_resource type="ViewportTexture" id=2]
+viewport_path = NodePath("Loop/RepeatViewport")
+
+[node name="Multishader_02" type="Node2D"]
+script = ExtResource( 3 )
+
+[node name="PointsViewport" type="Viewport" parent="."]
+size = Vector2( 2048, 2048 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="PointsTextureRect" type="TextureRect" parent="PointsViewport"]
+material = SubResource( 1 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 1 )
+stretch_mode = 1
+
+[node name="CleanupViewport" type="Viewport" parent="."]
+size = Vector2( 2048, 2048 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="CleanupViewport"]
+material = SubResource( 4 )
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 3 )
+
+[node name="Loop" type="Node2D" parent="."]
+script = ExtResource( 6 )
+
+[node name="Viewport" type="Viewport" parent="Loop"]
+size = Vector2( 2048, 2048 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="Loop/Viewport"]
+material = SubResource( 6 )
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 5 )
+
+[node name="Timer" type="Timer" parent="Loop/Viewport/TextureRect"]
+wait_time = 1.003
+one_shot = true
+autostart = true
+
+[node name="RepeatViewport" type="Viewport" parent="Loop"]
+size = Vector2( 2048, 2048 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="Loop/RepeatViewport"]
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 7 )
+
+[node name="FinalTextureRect" type="TextureRect" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 2 )
+
+[connection signal="timeout" from="Loop/Viewport/TextureRect/Timer" to="Loop" method="_on_Timer_timeout"]

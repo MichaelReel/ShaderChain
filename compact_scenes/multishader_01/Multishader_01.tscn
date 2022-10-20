@@ -1,0 +1,98 @@
+[gd_scene load_steps=14 format=2]
+
+[ext_resource path="res://icon.png" type="Texture" id=1]
+[ext_resource path="res://compact_scenes/multishader_01/noise.gdshader" type="Shader" id=2]
+[ext_resource path="res://compact_scenes/multishader_01/contour.gdshader" type="Shader" id=3]
+[ext_resource path="res://compact_scenes/multishader_01/dome.gdshader" type="Shader" id=4]
+[ext_resource path="res://compact_scenes/multishader_01/intensity.gdshader" type="Shader" id=5]
+
+[sub_resource type="ShaderMaterial" id=1]
+shader = ExtResource( 2 )
+
+[sub_resource type="ShaderMaterial" id=6]
+shader = ExtResource( 4 )
+shader_param/x_shape = 0.5
+shader_param/depth = 0.182
+
+[sub_resource type="ViewportTexture" id=5]
+viewport_path = NodePath("NoiseViewport")
+
+[sub_resource type="ShaderMaterial" id=8]
+shader = ExtResource( 5 )
+shader_param/min_intensity = 0.2
+shader_param/max_intensity = 0.7
+
+[sub_resource type="ViewportTexture" id=7]
+viewport_path = NodePath("DomeViewport")
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = ExtResource( 3 )
+
+[sub_resource type="ViewportTexture" id=3]
+viewport_path = NodePath("IntensityViewport")
+
+[sub_resource type="ViewportTexture" id=2]
+viewport_path = NodePath("ContourViewport")
+
+[node name="Multishader_01" type="Node2D"]
+
+[node name="NoiseViewport" type="Viewport" parent="."]
+size = Vector2( 2048, 2048 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="NoiseShaderTextureRect" type="TextureRect" parent="NoiseViewport"]
+material = SubResource( 1 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 1 )
+stretch_mode = 1
+
+[node name="DomeViewport" type="Viewport" parent="."]
+size = Vector2( 2048, 2048 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="DomeViewport"]
+material = SubResource( 6 )
+use_parent_material = true
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 5 )
+
+[node name="IntensityViewport" type="Viewport" parent="."]
+size = Vector2( 2048, 2048 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="IntensityViewport"]
+material = SubResource( 8 )
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 7 )
+
+[node name="ContourViewport" type="Viewport" parent="."]
+size = Vector2( 2048, 2048 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="ContourViewport"]
+material = SubResource( 4 )
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 3 )
+
+[node name="FinalResultTextureRect" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = 2048.0
+margin_bottom = 2048.0
+texture = SubResource( 2 )
