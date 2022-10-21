@@ -1,17 +1,17 @@
 shader_type canvas_item;
 
+
+const float GRID = 25.0;
+
 vec2 random2( vec2 p ) {
 	return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
 }
 
 void fragment() {
-	vec2 st = UV * 15.0;
-
-	vec3 color = vec3(.0);
-
 	// Tile the space
-	vec2 i_st = floor(st);
-	vec2 f_st = fract(st);
+	vec2 st = UV * GRID;
+	vec2 i_st = floor(st); // Tile col and row
+	vec2 f_st = fract(st); // Position within the tile
 
 	// Random position from current + neighbor place in the grid
 	vec2 point = random2(i_st);
@@ -23,12 +23,8 @@ void fragment() {
 	float dist = length(diff);
 	
 	// Draw 1 or 2 cells at the center
-	color += step(dist, 0.0025);
-	
-	// Set red and green of a point to the x and y
-	color.r = step(dist, 0.0025) * UV.x;
-	color.g = step(dist, 0.0025) * UV.y;
-
+	vec3 color = vec3(step(dist, GRID / 2048.0));
+	color.rg = step(1.0, color.b) * UV;
 
 	COLOR = vec4(color,1.0);
 }

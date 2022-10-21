@@ -34,5 +34,5 @@ void fragment() {
 	vec2 compass_dir = get_compass_direction(from_center);
 	vec2 uv = get_pos_from_dir(compass_dir);
 	
-	COLOR = vec4(uv, 0.5, 1.0);
+	COLOR = vec4(uv, 0.0, 1.0);
 }

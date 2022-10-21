@@ -53,15 +53,23 @@ vec2 get_pos_from_dir(in vec2 dir) {
 	return (dir + vec2(1.0)) / 2.0;
 }
 
+int get_flow_ecouragement(int dir_i, vec2 uv, float rand) {
+	// Encourage the flow to curver towards the edge of the texture
+	// Favour curving towards the cardinal of UV
+	int card = get_compass_direction(get_dir_from_pos(uv));
+	int simple_diff = card - dir_i;
+	// 4 and -4 are basically equivalent, but that's probably okay ¯\_(ツ)_/¯
+	if (simple_diff > 4) return simple_diff - 8;
+	if (simple_diff < -4) return simple_diff + 8;
+	return simple_diff;
+}
+
 int get_next_flow_dir(int i, vec2 uv) {
 	// randomly change direction, but default to keeping the same direction
 	float rand = fract(length(random2(uv)));
 	
 	// Favour curving towards the cardinal of UV
-	int card = get_compass_direction(get_dir_from_pos(uv));
-	int dir_diff = ((card - i) > 4) ? 
-			card - i - 8 : (((card - i) < -3) ?
-			card - i + 8 : card - i);
+	int dir_diff = get_flow_ecouragement(i, uv, rand);
 	
 	if (dir_diff != 0 && rand <= STRAIGHTEN_CHANCE * float(abs(dir_diff))) {
 		int diff = dir_diff / abs(dir_diff);

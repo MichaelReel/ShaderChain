@@ -1,0 +1,102 @@
+[gd_scene load_steps=14 format=2]
+
+[ext_resource path="res://icon.png" type="Texture" id=1]
+[ext_resource path="res://compact_scenes/multishader_03/01_worleyinit.gdshader" type="Shader" id=2]
+[ext_resource path="res://compact_scenes/multishader_03/02_worleytidy.gdshader" type="Shader" id=3]
+[ext_resource path="res://compact_scenes/multishader_03/03_FlowNoiseLoop.gd" type="Script" id=4]
+[ext_resource path="res://compact_scenes/multishader_03/03_flownoise.gdshader" type="Shader" id=5]
+
+[sub_resource type="ShaderMaterial" id=1]
+shader = ExtResource( 2 )
+
+[sub_resource type="ShaderMaterial" id=5]
+shader = ExtResource( 3 )
+
+[sub_resource type="ViewportTexture" id=3]
+viewport_path = NodePath("WorleyInitViewport")
+
+[sub_resource type="ShaderMaterial" id=8]
+shader = ExtResource( 5 )
+shader_param/A = 1.5
+
+[sub_resource type="ViewportTexture" id=6]
+viewport_path = NodePath("WorleyTidyViewport")
+
+[sub_resource type="ViewportTexture" id=7]
+viewport_path = NodePath("FlowNoiseLoop/FlowNoiseViewport")
+
+[sub_resource type="ShaderMaterial" id=4]
+
+[sub_resource type="ViewportTexture" id=2]
+viewport_path = NodePath("FlowNoiseLoop/RepeaterViewport")
+
+[node name="Multishader_03" type="Node2D"]
+
+[node name="WorleyInitViewport" type="Viewport" parent="."]
+size = Vector2( 2048, 2048 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="WorleyInitViewport"]
+material = SubResource( 1 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 1 )
+stretch_mode = 1
+
+[node name="WorleyTidyViewport" type="Viewport" parent="."]
+size = Vector2( 2048, 2048 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="WorleyTidyViewport"]
+material = SubResource( 5 )
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 3 )
+
+[node name="FlowNoiseLoop" type="Node2D" parent="."]
+script = ExtResource( 4 )
+
+[node name="FlowNoiseViewport" type="Viewport" parent="FlowNoiseLoop"]
+size = Vector2( 2048, 2048 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="FlowNoiseLoop/FlowNoiseViewport"]
+material = SubResource( 8 )
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 6 )
+
+[node name="RepeaterViewport" type="Viewport" parent="FlowNoiseLoop"]
+size = Vector2( 2048, 2048 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="FlowNoiseLoop/RepeaterViewport"]
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 7 )
+
+[node name="LoopStartTimer" type="Timer" parent="FlowNoiseLoop"]
+one_shot = true
+autostart = true
+
+[node name="FinalResultTextureRect" type="TextureRect" parent="."]
+material = SubResource( 4 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = 2048.0
+margin_bottom = 2048.0
+texture = SubResource( 2 )
+
+[connection signal="timeout" from="FlowNoiseLoop/LoopStartTimer" to="FlowNoiseLoop" method="_on_LoopStartTimer_timeout"]
