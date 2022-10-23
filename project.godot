@@ -11,13 +11,12 @@ config_version=4
 [application]
 
 config/name="ShaderChain"
-run/main_scene="res://compact_scenes/multishader_03/Multishader_03.tscn"
+run/main_scene="res://compact_scenes/multishader_04/Multishader_04.tscn"
 config/icon="res://icon.png"
 
 [display]
 
-window/size/width=2048
-window/size/height=2048
+window/size/height=1024
 
 [gui]
 

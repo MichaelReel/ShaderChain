@@ -1,0 +1,212 @@
+[gd_scene load_steps=26 format=2]
+
+[ext_resource path="res://icon.png" type="Texture" id=1]
+[ext_resource path="res://compact_scenes/multishader_04/a_01_worleyinit.gdshader" type="Shader" id=2]
+[ext_resource path="res://compact_scenes/multishader_04/a_02_worleytidy.gdshader" type="Shader" id=3]
+[ext_resource path="res://compact_scenes/multishader_04/b_01_noise.gdshader" type="Shader" id=4]
+[ext_resource path="res://compact_scenes/multishader_04/b_02_dome.gdshader" type="Shader" id=5]
+[ext_resource path="res://compact_scenes/multishader_04/c_01_flowmap.gdshader" type="Shader" id=6]
+[ext_resource path="res://compact_scenes/multishader_04/f_01_blendmaps.gdshader" type="Shader" id=7]
+[ext_resource path="res://compact_scenes/multishader_04/e_01_waterflow.gdshader" type="Shader" id=8]
+[ext_resource path="res://compact_scenes/multishader_04/e_WaterFlow.gd" type="Script" id=9]
+
+[sub_resource type="ShaderMaterial" id=2]
+resource_local_to_scene = true
+shader = ExtResource( 2 )
+shader_param/grid = 128.0
+
+[sub_resource type="ShaderMaterial" id=4]
+resource_local_to_scene = true
+shader = ExtResource( 3 )
+
+[sub_resource type="ViewportTexture" id=5]
+viewport_path = NodePath("WorleyPoints/WorleyInitViewport")
+
+[sub_resource type="ShaderMaterial" id=6]
+resource_local_to_scene = true
+shader = ExtResource( 4 )
+shader_param/warping = 0.15
+
+[sub_resource type="ShaderMaterial" id=7]
+resource_local_to_scene = true
+shader = ExtResource( 5 )
+shader_param/x_shape = 0.5
+shader_param/depth = 0.5
+
+[sub_resource type="ViewportTexture" id=8]
+viewport_path = NodePath("HeightMap/NoiseViewport")
+
+[sub_resource type="ShaderMaterial" id=10]
+resource_local_to_scene = true
+shader = ExtResource( 6 )
+
+[sub_resource type="ViewportTexture" id=9]
+viewport_path = NodePath("HeightMap/DomeViewport")
+
+[sub_resource type="ViewportTexture" id=16]
+viewport_path = NodePath("FlowMap/FlowViewport")
+
+[sub_resource type="ShaderMaterial" id=14]
+resource_local_to_scene = true
+shader = ExtResource( 8 )
+shader_param/flow_map = SubResource( 16 )
+
+[sub_resource type="ViewportTexture" id=17]
+viewport_path = NodePath("WorleyPoints/WorleyTidy")
+
+[sub_resource type="ViewportTexture" id=15]
+viewport_path = NodePath("WaterFlow/WaterFlowViewport")
+
+[sub_resource type="ViewportTexture" id=12]
+viewport_path = NodePath("WaterFlow/RepeaterViewport")
+
+[sub_resource type="ViewportTexture" id=13]
+viewport_path = NodePath("HeightMap/DomeViewport")
+
+[sub_resource type="ShaderMaterial" id=11]
+resource_local_to_scene = true
+shader = ExtResource( 7 )
+shader_param/blend = 0.5
+shader_param/height_map = SubResource( 13 )
+shader_param/flow_map = SubResource( 12 )
+
+[sub_resource type="ViewportTexture" id=3]
+viewport_path = NodePath("WaterFlow/WaterFlowViewport")
+
+[node name="Multishader_04" type="Node2D"]
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="WorleyPoints" type="Node2D" parent="."]
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="WorleyInitViewport" type="Viewport" parent="WorleyPoints"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="WorleyPoints/WorleyInitViewport"]
+material = SubResource( 2 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 1 )
+stretch_mode = 1
+
+[node name="WorleyTidy" type="Viewport" parent="WorleyPoints"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="WorleyPoints/WorleyTidy"]
+material = SubResource( 4 )
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 5 )
+
+[node name="HeightMap" type="Node2D" parent="."]
+
+[node name="NoiseViewport" type="Viewport" parent="HeightMap"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="HeightMap/NoiseViewport"]
+material = SubResource( 6 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 1 )
+stretch_mode = 1
+
+[node name="DomeViewport" type="Viewport" parent="HeightMap"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="HeightMap/DomeViewport"]
+material = SubResource( 7 )
+texture = SubResource( 8 )
+
+[node name="FlowMap" type="Node2D" parent="."]
+
+[node name="FlowViewport" type="Viewport" parent="FlowMap"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="FlowMap/FlowViewport"]
+material = SubResource( 10 )
+margin_right = 40.0
+margin_bottom = 40.0
+texture = SubResource( 9 )
+
+[node name="WaterFlow" type="Node2D" parent="."]
+script = ExtResource( 9 )
+
+[node name="WaterFlowViewport" type="Viewport" parent="WaterFlow"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="InputTextureRect" type="TextureRect" parent="WaterFlow/WaterFlowViewport"]
+material = SubResource( 14 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = SubResource( 17 )
+
+[node name="RepeaterViewport" type="Viewport" parent="WaterFlow"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="RepeaterTextureRect" type="TextureRect" parent="WaterFlow/RepeaterViewport"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = SubResource( 15 )
+stretch_mode = 1
+
+[node name="RepeatStartTimer" type="Timer" parent="WaterFlow"]
+one_shot = true
+autostart = true
+
+[node name="DebugBlendDisplay2" type="Node2D" parent="."]
+
+[node name="DebugViewport" type="Viewport" parent="DebugBlendDisplay2"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="DebugBlendDisplay2/DebugViewport"]
+material = SubResource( 11 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 1 )
+stretch_mode = 1
+
+[node name="DisplayRect" type="TextureRect" parent="."]
+margin_right = 1024.0
+margin_bottom = 1024.0
+texture = SubResource( 3 )
+
+[connection signal="timeout" from="WaterFlow/RepeatStartTimer" to="WaterFlow" method="_on_RepeatStartTimer_timeout"]
