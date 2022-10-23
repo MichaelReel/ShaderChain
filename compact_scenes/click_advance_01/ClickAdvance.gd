@@ -8,25 +8,39 @@ onready var repeat_delay_timer := $RepeatDelayTimer
 
 onready var shader_path_config : Array = [
 	{"root": $HeightMap/NoiseGeneration, "capture": "noise"},
-	{"root": $HeightMap/EdgeAdjust, "capture": "edge", "texture" : "noise"},
-	{"root": $HeightMap/HeightAdjust, "capture": "height", "texture": "edge"},
-	{"root": $FlowMap, "capture": "flowmap", "texture": "height"},
+	{"root": $HeightMap/EdgeAdjust, "texture" : "noise", "capture": "edge"},
+	{"root": $HeightMap/HeightAdjust, "texture": "edge", "capture": "height"},
+	{
+		"root": $Surfaces/FlatsInit,
+		"shader_textures": {"height_map": "height"},
+		"feedback": 1,
+		"capture": "flatsmap",
+	},
+	{"root": $FlowMap, "texture": "height", "capture": "flowmap"},
 	{"root": $PointsMap, "capture": "points"},
 	{
-		"root": $FlowDrawer/FlowInput,
-		"capture": "flowdraw",
+		"root": $DownFlowDrawer,
 		"texture": "points",
 		"shader_textures": {"flow_map": "flowmap"},
 		"feedback": 1,
+		"capture": "downflowdraw",
 	},
 	{
-		"root": $FlowHeights, 
-		"capture": "flowheights", 
+		"root": $UpFlowDrawer,
+		"texture": "points",
+		"shader_textures": {"flow_map": "flowmap"},
+		"feedback": 1,
+		"capture": "upflowdraw",
+	},
+	{
+		"root": $FlowPaths, 
 		"shader_textures": {
 			"height_map": "height",
-			"flow_map": "flowdraw",
+			"up_flow_map": "upflowdraw",
+			"down_flow_map": "downflowdraw",
 			"point_map": "points",
 		},
+		"capture": "flowpaths",
 	},
 ]
 
@@ -74,15 +88,18 @@ func _advance():
 		repeat_delay_timer.start()
 
 func _on_RepeatDelayTimer_timeout():
-	current_viewport.set_clear_mode(Viewport.CLEAR_MODE_ONLY_NEXT_FRAME)
+	var texture_rect : TextureRect = current_texture_rect
+	var viewport : Viewport = current_viewport
+	
+	viewport.set_clear_mode(Viewport.CLEAR_MODE_ONLY_NEXT_FRAME)
 	# Wait until the frame has finished before getting the texture.
 	yield(VisualServer, "frame_post_draw")
 	
 	# Retrieve the captured image.
-	var repeat_img = current_viewport.get_texture().get_data()
+	var repeat_img = viewport.get_texture().get_data()
 	var texture = ImageTexture.new()
 	texture.create_from_image(repeat_img)
-	current_texture_rect.texture = texture
+	texture_rect.texture = texture
 
 func _get_captured_texture(var capture_name : String) -> ImageTexture:
 	var capture_img : Image = captures[capture_name]
@@ -93,6 +110,9 @@ func _get_captured_texture(var capture_name : String) -> ImageTexture:
 func _process(delta):
 	click_wait -= delta
 	if Input.is_mouse_button_pressed(BUTTON_LEFT) and click_wait <= 0.0:
+		# Don't redraw anything, we're already moving on
+		repeat_delay_timer.stop()
+		# Capture the current viewport and delay lingering clicks
 		print("capturing " + current_root.name)
 		_capture_viewport_image()
 		click_wait = CLICK_SPEED

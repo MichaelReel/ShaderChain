@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=24 format=2]
 
 [ext_resource path="res://compact_scenes/click_advance_01/ClickAdvance.gd" type="Script" id=1]
 [ext_resource path="res://icon.png" type="Texture" id=2]
@@ -7,9 +7,12 @@
 [ext_resource path="res://compact_scenes/click_advance_01/edge_adjust.gdshader" type="Shader" id=5]
 [ext_resource path="res://compact_scenes/click_advance_01/worleyinit.gdshader" type="Shader" id=6]
 [ext_resource path="res://compact_scenes/click_advance_01/flowmap.gdshader" type="Shader" id=7]
-[ext_resource path="res://compact_scenes/click_advance_01/flow_drawer.gdshader" type="Shader" id=8]
+[ext_resource path="res://compact_scenes/click_advance_01/down_flow_drawer.gdshader" type="Shader" id=8]
 [ext_resource path="res://compact_scenes/click_advance_01/blend_maps.gdshader" type="Shader" id=9]
-[ext_resource path="res://compact_scenes/click_advance_01/flow_heights.gdshader" type="Shader" id=10]
+[ext_resource path="res://compact_scenes/click_advance_01/flow_paths.gdshader" type="Shader" id=10]
+[ext_resource path="res://compact_scenes/click_advance_01/up_flow_drawer.gdshader" type="Shader" id=11]
+[ext_resource path="res://compact_scenes/click_advance_01/flats_init.gdshader" type="Shader" id=12]
+[ext_resource path="res://compact_scenes/click_advance_01/black.png" type="Texture" id=13]
 
 [sub_resource type="ShaderMaterial" id=1]
 shader = ExtResource( 3 )
@@ -25,23 +28,29 @@ shader = ExtResource( 4 )
 shader_param/min_height = 0.0
 shader_param/max_height = 1.0
 
+[sub_resource type="ShaderMaterial" id=11]
+shader = ExtResource( 12 )
+
 [sub_resource type="ShaderMaterial" id=5]
 shader = ExtResource( 7 )
 
 [sub_resource type="ShaderMaterial" id=4]
 shader = ExtResource( 6 )
-shader_param/grid = 128.0
+shader_param/grid = 64.0
 
 [sub_resource type="ShaderMaterial" id=6]
 shader = ExtResource( 8 )
 shader_param/flow_map = ExtResource( 2 )
 
-[sub_resource type="ShaderMaterial" id=8]
-shader = ExtResource( 9 )
-shader_param/blend = 0.5
+[sub_resource type="ShaderMaterial" id=10]
+shader = ExtResource( 11 )
 
 [sub_resource type="ShaderMaterial" id=9]
 shader = ExtResource( 10 )
+
+[sub_resource type="ShaderMaterial" id=8]
+shader = ExtResource( 9 )
+shader_param/blend = 0.5
 
 [node name="ClickAdvance" type="Node2D"]
 script = ExtResource( 1 )
@@ -96,6 +105,24 @@ anchor_bottom = 1.0
 texture = ExtResource( 2 )
 stretch_mode = 1
 
+[node name="Surfaces" type="Node2D" parent="."]
+
+[node name="FlatsInit" type="Node2D" parent="Surfaces"]
+
+[node name="Viewport" type="Viewport" parent="Surfaces/FlatsInit"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="Surfaces/FlatsInit/Viewport"]
+material = SubResource( 11 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 13 )
+stretch_mode = 1
+
 [node name="FlowMap" type="Node2D" parent="."]
 
 [node name="Viewport" type="Viewport" parent="FlowMap"]
@@ -128,19 +155,49 @@ anchor_bottom = 1.0
 texture = ExtResource( 2 )
 stretch_mode = 1
 
-[node name="FlowDrawer" type="Node2D" parent="."]
+[node name="DownFlowDrawer" type="Node2D" parent="."]
 
-[node name="FlowInput" type="Node2D" parent="FlowDrawer"]
-
-[node name="Viewport" type="Viewport" parent="FlowDrawer/FlowInput"]
+[node name="Viewport" type="Viewport" parent="DownFlowDrawer"]
 size = Vector2( 1024, 1024 )
 hdr = false
 disable_3d = true
 usage = 0
 render_target_v_flip = true
 
-[node name="TextureRect" type="TextureRect" parent="FlowDrawer/FlowInput/Viewport"]
+[node name="TextureRect" type="TextureRect" parent="DownFlowDrawer/Viewport"]
 material = SubResource( 6 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 2 )
+stretch_mode = 1
+
+[node name="UpFlowDrawer" type="Node2D" parent="."]
+
+[node name="Viewport" type="Viewport" parent="UpFlowDrawer"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="UpFlowDrawer/Viewport"]
+material = SubResource( 10 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 2 )
+stretch_mode = 1
+
+[node name="FlowPaths" type="Node2D" parent="."]
+
+[node name="Viewport" type="Viewport" parent="FlowPaths"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="FlowPaths/Viewport"]
+material = SubResource( 9 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 texture = ExtResource( 2 )
@@ -161,22 +218,6 @@ material = SubResource( 8 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 texture = ExtResource( 2 )
-
-[node name="FlowHeights" type="Node2D" parent="."]
-
-[node name="Viewport" type="Viewport" parent="FlowHeights"]
-size = Vector2( 1024, 1024 )
-hdr = false
-disable_3d = true
-usage = 0
-render_target_v_flip = true
-
-[node name="TextureRect" type="TextureRect" parent="FlowHeights/Viewport"]
-material = SubResource( 9 )
-anchor_right = 1.0
-anchor_bottom = 1.0
-texture = ExtResource( 2 )
-stretch_mode = 1
 
 [node name="DisplayTextureRect" type="TextureRect" parent="."]
 anchor_right = 1.0
