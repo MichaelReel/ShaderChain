@@ -50,6 +50,7 @@ var current_index : int = -1
 var current_root : Node2D
 var current_viewport : Viewport
 var current_texture_rect : TextureRect
+var repeat_hash : String = ""
 
 var click_wait := CLICK_SPEED
 
@@ -85,6 +86,7 @@ func _advance():
 	display.texture = current_viewport.get_texture()
 	
 	if "feedback" in shader_path_config[current_index]:
+		
 		repeat_delay_timer.start()
 
 func _on_RepeatDelayTimer_timeout():
@@ -96,10 +98,30 @@ func _on_RepeatDelayTimer_timeout():
 	yield(VisualServer, "frame_post_draw")
 	
 	# Retrieve the captured image.
-	var repeat_img = viewport.get_texture().get_data()
+	var repeat_img : Image = viewport.get_texture().get_data()
+	var hash_code := hash_data(repeat_img.get_data())
+	if hash_code == repeat_hash:
+		# Got 2 frames the same, let's stop
+		repeat_delay_timer.stop()
+		repeat_hash = ""
+		print("Repetition stopped by duplicate frames")
+		return
+	
+	repeat_hash = hash_code
+	
+	# Create the texture to act as input for the next interation
 	var texture = ImageTexture.new()
 	texture.create_from_image(repeat_img)
 	texture_rect.texture = texture
+
+func hash_data(data: PoolByteArray) -> String:
+	# Start a SHA-256 context.
+	var ctx = HashingContext.new()
+	ctx.start(HashingContext.HASH_SHA256)
+	ctx.update(data)
+	# Get the computed hash.
+	var res = ctx.finish()
+	return res.hex_encode()
 
 func _get_captured_texture(var capture_name : String) -> ImageTexture:
 	var capture_img : Image = captures[capture_name]
