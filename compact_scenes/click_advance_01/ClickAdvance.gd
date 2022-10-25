@@ -13,7 +13,7 @@ onready var shader_path_config : Array = [
 	{
 		"root": $Surfaces/FlatsInit,
 		"shader_textures": {"height_map": "height"},
-		"feedback": 1,
+#		"feedback": 1,
 		"capture": "flatsmap",
 	},
 	{"root": $FlowMap, "texture": "height", "capture": "flowmap"},
@@ -38,9 +38,15 @@ onready var shader_path_config : Array = [
 			"height_map": "height",
 			"up_flow_map": "upflowdraw",
 			"down_flow_map": "downflowdraw",
-			"point_map": "points",
+			"pool_map": "flatsmap",
 		},
 		"capture": "flowpaths",
+	},
+	{
+		"root": $"3DTerrainIn2D",
+		"3d_shader_textures": {
+			"height_map": "height"
+		}
 	},
 ]
 
@@ -50,6 +56,7 @@ var current_index : int = -1
 var current_root : Node2D
 var current_viewport : Viewport
 var current_texture_rect : TextureRect
+var current_mesh_instance : MeshInstance
 var repeat_hash : String = ""
 
 var click_wait := CLICK_SPEED
@@ -68,6 +75,7 @@ func _advance():
 	current_root = shader_path_config[current_index]["root"]
 	current_viewport = current_root.get_node("Viewport")
 	current_texture_rect = current_viewport.get_node("TextureRect")
+	current_mesh_instance = current_viewport.get_node("MeshInstance")
 	
 	# Set a new texture, from captured images, if configured to do so
 	if "texture" in shader_path_config[current_index]:
@@ -76,11 +84,18 @@ func _advance():
 		current_texture_rect.texture = texture
 	
 	if "shader_textures" in shader_path_config[current_index]:
-		var shader_texures = shader_path_config[current_index]["shader_textures"]
-		for uniform_name in shader_texures:
-			var capture_name : String = shader_texures[uniform_name]
+		var shader_textures = shader_path_config[current_index]["shader_textures"]
+		for uniform_name in shader_textures:
+			var capture_name : String = shader_textures[uniform_name]
 			var texture = _get_captured_texture(capture_name)
 			current_texture_rect.material.set_shader_param(uniform_name, texture)
+		
+	if "3d_shader_textures" in shader_path_config[current_index]:
+		var shader_textures = shader_path_config[current_index]["3d_shader_textures"]
+		for uniform_name in shader_textures:
+			var capture_name : String = shader_textures[uniform_name]
+			var texture = _get_captured_texture(capture_name)
+			current_mesh_instance.mesh.material.set_shader_param(uniform_name, texture)
 	
 	# Switch display to show the current viewport
 	display.texture = current_viewport.get_texture()
@@ -135,8 +150,13 @@ func _process(delta):
 		# Don't redraw anything, we're already moving on
 		repeat_delay_timer.stop()
 		# Capture the current viewport and delay lingering clicks
-		print("capturing " + current_root.name)
-		_capture_viewport_image()
+		
+		if "capture" in shader_path_config[current_index]:
+			print("capturing " + current_root.name)
+			_capture_viewport_image()
+		else:
+			_advance()
+		
 		click_wait = CLICK_SPEED
 
 func _capture_viewport_image() -> void:
