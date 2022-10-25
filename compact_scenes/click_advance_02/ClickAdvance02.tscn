@@ -1,0 +1,140 @@
+[gd_scene load_steps=14 format=2]
+
+[ext_resource path="res://icon.png" type="Texture" id=1]
+[ext_resource path="res://compact_scenes/click_advance_02/height_map/01_noise_map.gdshader" type="Shader" id=2]
+[ext_resource path="res://compact_scenes/click_advance_02/height_map/02_edge_fade.gdshader" type="Shader" id=3]
+[ext_resource path="res://compact_scenes/click_advance_02/height_map/03_height_adjust.gdshader" type="Shader" id=4]
+[ext_resource path="res://compact_scenes/click_advance_02/ClickAdvance.gd" type="Script" id=5]
+[ext_resource path="res://compact_scenes/click_advance_02/flooding/flood_up.gdshader" type="Shader" id=6]
+[ext_resource path="res://compact_scenes/click_advance_02/flooding/black_texture.png" type="Texture" id=7]
+[ext_resource path="res://compact_scenes/click_advance_02/flooding/depression_points.gdshader" type="Shader" id=8]
+
+[sub_resource type="ShaderMaterial" id=1]
+shader = ExtResource( 2 )
+shader_param/warping = 0.15
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = ExtResource( 3 )
+shader_param/x_shape = 0.5
+shader_param/depth = 0.5
+
+[sub_resource type="ShaderMaterial" id=3]
+shader = ExtResource( 4 )
+shader_param/min_height = 0.0
+shader_param/max_height = 1.0
+
+[sub_resource type="ShaderMaterial" id=5]
+shader = ExtResource( 8 )
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = ExtResource( 6 )
+
+[node name="ClickAdvance02" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 5 )
+
+[node name="DisplayTextureRect" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 1 )
+stretch_mode = 1
+
+[node name="RepeatDelayTimer" type="Timer" parent="."]
+wait_time = 0.1
+
+[node name="HeightMap" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="NoiseMap" type="Control" parent="HeightMap"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Viewport" type="Viewport" parent="HeightMap/NoiseMap"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="HeightMap/NoiseMap/Viewport"]
+material = SubResource( 1 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 1 )
+stretch_mode = 1
+
+[node name="EdgeFade" type="Control" parent="HeightMap"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Viewport" type="Viewport" parent="HeightMap/EdgeFade"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="HeightMap/EdgeFade/Viewport"]
+material = SubResource( 2 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 1 )
+stretch_mode = 1
+
+[node name="HeightAdjust" type="Control" parent="HeightMap"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Viewport" type="Viewport" parent="HeightMap/HeightAdjust"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="HeightMap/HeightAdjust/Viewport"]
+material = SubResource( 3 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 1 )
+stretch_mode = 1
+
+[node name="Flooding" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="DepressionPoints" type="Control" parent="Flooding"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Viewport" type="Viewport" parent="Flooding/DepressionPoints"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="Flooding/DepressionPoints/Viewport"]
+material = SubResource( 5 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 7 )
+stretch_mode = 1
+
+[node name="Viewport" type="Viewport" parent="Flooding"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="Flooding/Viewport"]
+material = SubResource( 4 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 7 )
+stretch_mode = 1
+
+[connection signal="timeout" from="RepeatDelayTimer" to="." method="_on_RepeatDelayTimer_timeout"]
