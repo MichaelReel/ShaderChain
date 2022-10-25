@@ -45,8 +45,9 @@ onready var shader_path_config : Array = [
 	{
 		"root": $"3DTerrainIn2D",
 		"3d_shader_textures": {
-			"height_map": "height"
-		}
+			"height_map": "height",
+			"surface_map": "flowpaths"
+		},
 	},
 ]
 
@@ -55,8 +56,6 @@ var captures : Dictionary = {}
 var current_index : int = -1
 var current_root : Node2D
 var current_viewport : Viewport
-var current_texture_rect : TextureRect
-var current_mesh_instance : MeshInstance
 var repeat_hash : String = ""
 
 var click_wait := CLICK_SPEED
@@ -74,16 +73,16 @@ func _advance():
 	current_index += 1
 	current_root = shader_path_config[current_index]["root"]
 	current_viewport = current_root.get_node("Viewport")
-	current_texture_rect = current_viewport.get_node("TextureRect")
-	current_mesh_instance = current_viewport.get_node("MeshInstance")
 	
 	# Set a new texture, from captured images, if configured to do so
 	if "texture" in shader_path_config[current_index]:
+		var current_texture_rect : TextureRect = current_viewport.get_node("TextureRect")
 		var capture_name : String = shader_path_config[current_index]["texture"]
 		var texture = _get_captured_texture(capture_name)
 		current_texture_rect.texture = texture
 	
 	if "shader_textures" in shader_path_config[current_index]:
+		var current_texture_rect : TextureRect = current_viewport.get_node("TextureRect")
 		var shader_textures = shader_path_config[current_index]["shader_textures"]
 		for uniform_name in shader_textures:
 			var capture_name : String = shader_textures[uniform_name]
@@ -91,6 +90,7 @@ func _advance():
 			current_texture_rect.material.set_shader_param(uniform_name, texture)
 		
 	if "3d_shader_textures" in shader_path_config[current_index]:
+		var current_mesh_instance : MeshInstance = current_viewport.get_node("MeshInstance")
 		var shader_textures = shader_path_config[current_index]["3d_shader_textures"]
 		for uniform_name in shader_textures:
 			var capture_name : String = shader_textures[uniform_name]
@@ -105,7 +105,7 @@ func _advance():
 		repeat_delay_timer.start()
 
 func _on_RepeatDelayTimer_timeout():
-	var texture_rect : TextureRect = current_texture_rect
+	var current_texture_rect : TextureRect = current_viewport.get_node("TextureRect")
 	var viewport : Viewport = current_viewport
 	
 	viewport.set_clear_mode(Viewport.CLEAR_MODE_ONLY_NEXT_FRAME)
@@ -127,7 +127,7 @@ func _on_RepeatDelayTimer_timeout():
 	# Create the texture to act as input for the next interation
 	var texture = ImageTexture.new()
 	texture.create_from_image(repeat_img)
-	texture_rect.texture = texture
+	current_texture_rect.texture = texture
 
 func hash_data(data: PoolByteArray) -> String:
 	# Start a SHA-256 context.

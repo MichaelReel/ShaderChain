@@ -15,11 +15,12 @@ void fragment() {
 	
 	vec3 result = vec3(0.0);
 
-	if (down_flow_color.r > 0.0 || down_flow_color.g > 0.0 || down_flow_color.b > 0.0) {
-		result = vec3(0.0, 0.0, height);
-	} else if (up_flow_color.r > 0.0 || up_flow_color.g > 0.0 || up_flow_color.b > 0.0) {
-		result = vec3(0.0, 0.0, height);
-	} else if (pool_color.r >= 0.5 && pool_color.g >= 0.5 && pool_color.b >= 0.5) {
+//	if (down_flow_color.r > 0.0 || down_flow_color.g > 0.0 || down_flow_color.b > 0.0) {
+//		result = vec3(0.0, 0.0, height);
+//	} else if (up_flow_color.r > 0.0 || up_flow_color.g > 0.0 || up_flow_color.b > 0.0) {
+//		result = vec3(0.0, 0.0, height);
+//	} else
+	 if (pool_color.r >= 0.5 && pool_color.g >= 0.5 && pool_color.b >= 0.5) {
 		result = vec3(0.0, 0.0, height);
 	} else {
 		result = vec3(0.0, height, 0.0);

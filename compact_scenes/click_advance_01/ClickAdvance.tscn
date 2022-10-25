@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=2]
+[gd_scene load_steps=28 format=2]
 
 [ext_resource path="res://compact_scenes/click_advance_01/ClickAdvance.gd" type="Script" id=1]
 [ext_resource path="res://icon.png" type="Texture" id=2]
@@ -6,14 +6,15 @@
 [ext_resource path="res://compact_scenes/click_advance_01/height_adjust.gdshader" type="Shader" id=4]
 [ext_resource path="res://compact_scenes/click_advance_01/edge_adjust.gdshader" type="Shader" id=5]
 [ext_resource path="res://compact_scenes/click_advance_01/worleyinit.gdshader" type="Shader" id=6]
-[ext_resource path="res://compact_scenes/click_advance_01/flowmap.gdshader" type="Shader" id=7]
+[ext_resource path="res://compact_scenes/click_advance_01/flow_map.gdshader" type="Shader" id=7]
 [ext_resource path="res://compact_scenes/click_advance_01/down_flow_drawer.gdshader" type="Shader" id=8]
 [ext_resource path="res://compact_scenes/click_advance_01/blend_maps.gdshader" type="Shader" id=9]
 [ext_resource path="res://compact_scenes/click_advance_01/flow_paths.gdshader" type="Shader" id=10]
 [ext_resource path="res://compact_scenes/click_advance_01/up_flow_drawer.gdshader" type="Shader" id=11]
 [ext_resource path="res://compact_scenes/click_advance_01/flats_init.gdshader" type="Shader" id=12]
 [ext_resource path="res://compact_scenes/click_advance_01/black.png" type="Texture" id=13]
-[ext_resource path="res://compact_scenes/click_advance_01/terrain.gdshader" type="Shader" id=14]
+[ext_resource path="res://compact_scenes/click_advance_01/terrain_spatial.gdshader" type="Shader" id=14]
+[ext_resource path="res://compact_scenes/click_advance_01/MouseFov.gd" type="Script" id=15]
 
 [sub_resource type="ShaderMaterial" id=1]
 shader = ExtResource( 3 )
@@ -37,7 +38,7 @@ shader = ExtResource( 7 )
 
 [sub_resource type="ShaderMaterial" id=4]
 shader = ExtResource( 6 )
-shader_param/grid = 64.0
+shader_param/grid = 16.0
 
 [sub_resource type="ShaderMaterial" id=6]
 shader = ExtResource( 8 )
@@ -60,8 +61,10 @@ shader_param/height_scale = 0.4
 [sub_resource type="PlaneMesh" id=12]
 resource_local_to_scene = true
 material = SubResource( 14 )
+size = Vector2( 1, 1 )
 subdivide_width = 512
 subdivide_depth = 512
+center_offset = Vector3( -0.5, 0, -0.5 )
 
 [node name="ClickAdvance" type="Node2D"]
 script = ExtResource( 1 )
@@ -238,11 +241,17 @@ debug_draw = 3
 render_target_v_flip = true
 
 [node name="MeshInstance" type="MeshInstance" parent="3DTerrainIn2D/Viewport"]
+transform = Transform( 4, 0, 0, 0, 1, 0, 0, 0, 4, 2, -2, 2 )
 mesh = SubResource( 12 )
 skeleton = NodePath("")
 
 [node name="Camera" type="Camera" parent="3DTerrainIn2D/Viewport"]
-transform = Transform( 0.707107, -0.40558, 0.579228, 0, 0.819152, 0.573577, -0.707107, -0.40558, 0.579228, 1.5, 1.5, 1.5 )
+transform = Transform( 1, 0, 0, 0, 0.422618, 0.906308, 0, -0.906308, 0.422618, 0, 1.5, 1.5 )
+fov = 100.0
+script = ExtResource( 15 )
+
+[node name="DirectionalLight" type="DirectionalLight" parent="3DTerrainIn2D/Viewport"]
+transform = Transform( 1, 0, 0, 0, -0.603932, 0.797036, 0, -0.797036, -0.603932, 0, 0, 0 )
 
 [node name="DisplayTextureRect" type="TextureRect" parent="."]
 anchor_right = 1.0
