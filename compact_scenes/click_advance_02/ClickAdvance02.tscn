@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://icon.png" type="Texture" id=1]
 [ext_resource path="res://compact_scenes/click_advance_02/height_map/01_noise_map.gdshader" type="Shader" id=2]
@@ -8,6 +8,7 @@
 [ext_resource path="res://compact_scenes/click_advance_02/flooding/puddle_filler.gdshader" type="Shader" id=6]
 [ext_resource path="res://compact_scenes/click_advance_02/flooding/black_texture.png" type="Texture" id=7]
 [ext_resource path="res://compact_scenes/click_advance_02/flooding/depression_points.gdshader" type="Shader" id=8]
+[ext_resource path="res://compact_scenes/click_advance_02/merge_maps.gdshader" type="Shader" id=9]
 
 [sub_resource type="ShaderMaterial" id=1]
 shader = ExtResource( 2 )
@@ -28,6 +29,10 @@ shader = ExtResource( 8 )
 
 [sub_resource type="ShaderMaterial" id=4]
 shader = ExtResource( 6 )
+
+[sub_resource type="ShaderMaterial" id=6]
+shader = ExtResource( 9 )
+shader_param/blend = 0.5
 
 [node name="ClickAdvance02" type="Control"]
 anchor_right = 1.0
@@ -136,6 +141,24 @@ render_target_v_flip = true
 
 [node name="TextureRect" type="TextureRect" parent="Flooding/PuddleFiller/Viewport"]
 material = SubResource( 4 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 7 )
+stretch_mode = 1
+
+[node name="Merging" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Viewport" type="Viewport" parent="Merging"]
+size = Vector2( 1024, 1024 )
+hdr = false
+disable_3d = true
+usage = 0
+render_target_v_flip = true
+
+[node name="TextureRect" type="TextureRect" parent="Merging/Viewport"]
+material = SubResource( 6 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 texture = ExtResource( 7 )

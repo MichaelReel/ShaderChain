@@ -27,6 +27,15 @@ float highest_red_near(sampler2D puddle_map, vec2 uv, vec2 sps) {
 	return high_red; 
 }
 
+float lowest_red_near(sampler2D puddle_map, vec2 uv, vec2 sps) {
+	float lowest = 2.0;
+	for (int i = 0; i < dirs_1.length(); i++) {
+		float red = texture(puddle_map, uv + dirs_1[i] * sps).r;
+		lowest = min(red, lowest);
+	}
+	return lowest; 
+}
+
 float lowest_unred_near(sampler2D puddle_map, sampler2D heights, vec2 uv, vec2 sps) {
 	float lowest = 2.0;
 	for (int i = 0; i < dirs_1.length(); i++) {
@@ -52,16 +61,18 @@ void fragment() {
 	vec2 uv = UV;
 	vec2 sps = SCREEN_PIXEL_SIZE;
 	
-	vec3 height_color = texture(height_map, uv).rgb;
+	float height = texture(height_map, uv).r;
 	vec3 in_color = texture(TEXTURE, uv).rgb;
-	vec3 puddle_color = vec3(0.0, 0.0, in_color.b);
-	float near_red = highest_red_near(TEXTURE, uv, sps);
-	float near_unred = lowest_unred_near(TEXTURE, height_map, uv, sps);
+	float high_near_red = highest_red_near(TEXTURE, uv, sps);
+	float low_near_red = lowest_red_near(TEXTURE, uv, sps);
+	float low_near_unred = lowest_unred_near(TEXTURE, height_map, uv, sps);
+	
+	vec3 puddle_color = vec3(0.0, 0.0, 0.0);
 	
 	// Fresh squares, if near a red (flooded) square that is higher, mark red
 	if (is_black(in_color)) {
-		if (height_color.r <= near_red) {
-			puddle_color.r = near_red;
+		if (height < high_near_red) {
+			puddle_color.r = high_near_red;
 		}
 	}
 	
@@ -69,14 +80,6 @@ void fragment() {
 	if (in_color.r > 0.0) {
 		puddle_color.r = in_color.r;
 	}
-	
-	// Contained, if this red is the highest and there is higher unflooded
-	// Raise this red up to the lowest unflooded nearby height
-	if (in_color.r > near_red && in_color.r > 0.0 && near_unred < 1.1) {
-		puddle_color.r = max(near_unred, in_color.r);
-	}
-
-	
 	
 	COLOR = vec4(puddle_color, 1.0);
 }

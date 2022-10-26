@@ -18,10 +18,18 @@ onready var shader_path_config : Array = [
 	{
 		"root": $Flooding/PuddleFiller,
 		"texture": "depression_points",
-		"capture": "puddles",
+		"shader_textures": {"height_map": "height_adjust"},
 		"feedback": "counter",
 		"min_feedback": 2,
+		"capture": "puddles",
 	},
+	{
+		"root": $Merging,
+		"shader_textures": {
+			"height_map": "height_adjust",
+			"puddle_map": "puddles",
+		},
+	}
 ]
 
 var captures : Dictionary = {}
