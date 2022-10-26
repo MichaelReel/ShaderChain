@@ -112,7 +112,7 @@ void fragment() {
 	vec3 color = vec3(0.0);
 	
 	if (lowest_of_49(TEXTURE, uv, sps)) {
-		color = (vec3(height));
+		color = (vec3(height, 0.0, 0.0));
 	}
 	
 	COLOR = vec4(color, 1.0);

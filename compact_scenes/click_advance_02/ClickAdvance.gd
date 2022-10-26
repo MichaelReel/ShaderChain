@@ -15,6 +15,13 @@ onready var shader_path_config : Array = [
 		"texture": "height_adjust",
 		"capture": "depression_points",
 	},
+	{
+		"root": $Flooding/PuddleFiller,
+		"texture": "depression_points",
+		"capture": "puddles",
+		"feedback": "counter",
+		"min_feedback": 2,
+	},
 ]
 
 var captures : Dictionary = {}
@@ -81,19 +88,22 @@ func _on_RepeatDelayTimer_timeout():
 	# Wait until the frame has finished before getting the texture.
 	yield(VisualServer, "frame_post_draw")
 	
-	print ("grabbing texture")
-	
 	# Retrieve the captured image.
 	var repeat_img : Image = viewport.get_texture().get_data()
-	var hash_code := hash_data(repeat_img.get_data())
-	if hash_code == repeat_hash:
-		# Got 2 frames the same, let's stop
-		repeat_delay_timer.stop()
-		repeat_hash = ""
-		print("Repetition stopped by duplicate frames")
-		return
 	
-	repeat_hash = hash_code
+	# If we're passed the minimum frames, hash the image and check for matches
+	if (
+		not "min_feedback" in shader_path_config[current_index] 
+		or shader_path_config[current_index]["min_feedback"] < repeat_counter
+	):
+		var hash_code := hash_data(repeat_img.get_data())
+		if hash_code == repeat_hash:
+			# Got 2 frames the same, let's stop
+			repeat_delay_timer.stop()
+			repeat_hash = ""
+			print("Repetition stopped by duplication after " + str(repeat_counter) + " frames")
+			return
+		repeat_hash = hash_code
 	
 	# Setting up next iteration
 	print (str(repeat_counter))
@@ -102,7 +112,6 @@ func _on_RepeatDelayTimer_timeout():
 	repeat_counter += 1
 	
 	# Create the texture to act as input for the next interation
-	print("replacing texture")
 	var texture = ImageTexture.new()
 	texture.create_from_image(repeat_img)
 	current_texture_rect.texture = texture
