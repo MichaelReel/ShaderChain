@@ -1,6 +1,6 @@
 shader_type canvas_item;
 
-const float color_diff = 0.00390625;
+const float color_diff = 0.001953125;
 const vec2 dirs_1[] = {
 	vec2( 1.0,  0.0),  // E
 	vec2( 1.0,  1.0),  // NE
@@ -99,10 +99,6 @@ bool lowest_of_49(sampler2D tex, vec2 uv, vec2 sps) {
 		}
 	}
 	return true;
-}
-
-bool is_black(vec3 color) {
-	return color.r < color_diff && color.g < color_diff && color.b < color_diff;
 }
 
 void fragment() {

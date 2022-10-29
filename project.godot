@@ -11,7 +11,7 @@ config_version=4
 [application]
 
 config/name="ShaderChain"
-run/main_scene="res://compact_scenes/click_advance_02/ClickAdvance02.tscn"
+run/main_scene="res://compact_scenes/click_advance_03/ClickAdvance03.tscn"
 config/icon="res://icon.png"
 
 [display]

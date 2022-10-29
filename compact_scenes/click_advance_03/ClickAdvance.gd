@@ -11,16 +11,25 @@ onready var shader_path_config : Array = [
 	{"root": $HeightMap/EdgeFade, "texture" : "noise_map", "capture": "edge_fade"},
 	{"root": $HeightMap/HeightAdjust, "texture": "edge_fade", "capture": "height_adjust"},
 	{
-		"root": $SliceFlood/Slice, 
+		"root": $Flooding/DepressionPoints,
 		"texture": "height_adjust",
-		"loop": {
-			"uniform": "slice_height",
-			"start": 0.0,
-			"inc": 1.0 / 128.0,
-			"end": 1.0
-		},
-		"capture": "slice",
+		"capture": "depression_points",
 	},
+	{
+		"root": $Flooding/PuddleFiller,
+		"texture": "depression_points",
+		"shader_textures": {"height_map": "height_adjust"},
+		"feedback": "counter",
+		"min_feedback": 2,
+		"capture": "puddles",
+	},
+	{
+		"root": $Merging,
+		"shader_textures": {
+			"height_map": "height_adjust",
+			"puddle_map": "puddles",
+		},
+	}
 ]
 
 var captures : Dictionary = {}
@@ -30,7 +39,6 @@ var current_root : Control
 var current_viewport : Viewport
 var repeat_hash : String = ""
 var repeat_counter : int = 0;
-var loop_value = null
 
 var click_wait := CLICK_SPEED
 
@@ -39,54 +47,37 @@ func _ready():
 	_advance()
 
 func _advance():
-
-	if (
-		current_index >=0 
-		and "loop" in shader_path_config[current_index]
-		and loop_value != null
-		and loop_value < shader_path_config[current_index]["loop"]["end"]
-	):
-		loop_value += shader_path_config[current_index]["loop"]["inc"]
-	else:
-		# check we have more configurations to go
-		if current_index >= len(shader_path_config) - 1:
-			return
-		
-		# Index the next shader
-		current_index += 1
-		current_root = shader_path_config[current_index]["root"]
-		current_viewport = current_root.get_node("Viewport")
+	# check we have more configurations to go
+	if current_index >= len(shader_path_config) - 1:
+		return
 	
-		# Set a new texture, from captured images, if configured to do so
-		if "texture" in shader_path_config[current_index]:
-			var current_texture_rect : TextureRect = current_viewport.get_node("TextureRect")
-			var capture_name : String = shader_path_config[current_index]["texture"]
-			var texture = _get_captured_texture(capture_name)
-			current_texture_rect.texture = texture
-		
-		if "shader_textures" in shader_path_config[current_index]:
-			var current_texture_rect : TextureRect = current_viewport.get_node("TextureRect")
-			var shader_textures = shader_path_config[current_index]["shader_textures"]
-			for uniform_name in shader_textures:
-				var capture_name : String = shader_textures[uniform_name]
-				var texture = _get_captured_texture(capture_name)
-				current_texture_rect.material.set_shader_param(uniform_name, texture)
-			
-		if "3d_shader_textures" in shader_path_config[current_index]:
-			var current_mesh_instance : MeshInstance = current_viewport.get_node("MeshInstance")
-			var shader_textures = shader_path_config[current_index]["3d_shader_textures"]
-			for uniform_name in shader_textures:
-				var capture_name : String = shader_textures[uniform_name]
-				var texture = _get_captured_texture(capture_name)
-				current_mesh_instance.mesh.material.set_shader_param(uniform_name, texture)
-		
-	if "loop" in shader_path_config[current_index]:
+	# Index the next shader
+	current_index += 1
+	current_root = shader_path_config[current_index]["root"]
+	current_viewport = current_root.get_node("Viewport")
+	
+	# Set a new texture, from captured images, if configured to do so
+	if "texture" in shader_path_config[current_index]:
 		var current_texture_rect : TextureRect = current_viewport.get_node("TextureRect")
-		var uniform_name : String = shader_path_config[current_index]["loop"]["uniform"]
-		if loop_value == null:
-			loop_value = shader_path_config[current_index]["loop"]["start"]
-		print("Setting " + uniform_name + " to " + str(loop_value))
-		current_texture_rect.material.set_shader_param(uniform_name, loop_value)
+		var capture_name : String = shader_path_config[current_index]["texture"]
+		var texture = _get_captured_texture(capture_name)
+		current_texture_rect.texture = texture
+	
+	if "shader_textures" in shader_path_config[current_index]:
+		var current_texture_rect : TextureRect = current_viewport.get_node("TextureRect")
+		var shader_textures = shader_path_config[current_index]["shader_textures"]
+		for uniform_name in shader_textures:
+			var capture_name : String = shader_textures[uniform_name]
+			var texture = _get_captured_texture(capture_name)
+			current_texture_rect.material.set_shader_param(uniform_name, texture)
+		
+	if "3d_shader_textures" in shader_path_config[current_index]:
+		var current_mesh_instance : MeshInstance = current_viewport.get_node("MeshInstance")
+		var shader_textures = shader_path_config[current_index]["3d_shader_textures"]
+		for uniform_name in shader_textures:
+			var capture_name : String = shader_textures[uniform_name]
+			var texture = _get_captured_texture(capture_name)
+			current_mesh_instance.mesh.material.set_shader_param(uniform_name, texture)
 	
 	# Switch display to show the current viewport
 	display.texture = current_viewport.get_texture()
@@ -113,7 +104,7 @@ func _on_RepeatDelayTimer_timeout():
 		not "min_feedback" in shader_path_config[current_index] 
 		or shader_path_config[current_index]["min_feedback"] < repeat_counter
 	):
-		var hash_code := _hash_data(repeat_img.get_data())
+		var hash_code := hash_data(repeat_img.get_data())
 		if hash_code == repeat_hash:
 			# Got 2 frames the same, let's stop
 			repeat_delay_timer.stop()
@@ -134,7 +125,7 @@ func _on_RepeatDelayTimer_timeout():
 	current_texture_rect.texture = texture
 	
 
-func _hash_data(data: PoolByteArray) -> String:
+func hash_data(data: PoolByteArray) -> String:
 	# Start a SHA-256 context.
 	var ctx = HashingContext.new()
 	ctx.start(HashingContext.HASH_SHA256)
